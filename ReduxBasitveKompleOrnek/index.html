@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Redux basit fakat komple bir örnek</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://unpkg.com/redux@latest/dist/redux.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+  </head>
+  <body>
+    <input type="text" id="txtMetin"  />
+    <input type="button" id="btnDugme" class="btn btn-primary" value="" />
+
+    <hr />
+
+    <input type="text" id="txtMetinIcerik"   /><input type="button" class="btn btn-default" value="Metin İçerik" onclick="btnMetinIcerikOnClick()" /><br />
+    <input type="text" id="txtMetinRenk"  /><input type="button" class="btn btn-default" value="Metin Renk" onclick="btnMetinRenkOnClick()" /><br />
+    <p> </p>
+    <input type="text" id="txtDugmeDeger" /><input type="button" class="btn btn-default" value="Düğme Değer" onclick="btnDugmeDegerOnClick()" />
+    <input type="checkbox" checked id="chkDugmeAktiflik" onclick="btnDugmeAktiflikOnClick()" class="checkbox" />
+
+    <script>
+
+        
+        // Metin ile ilgili action'lar
+        var actionMetinIcerik = function(icerik) {
+            return {
+                type: "METIN.ICERIK",
+                icerik: icerik
+            }
+        }
+        var actionMetinRenk = function(renk) {
+            return {
+                type: "METIN.RENK",
+                renk: renk
+            }
+        }
+
+        // Düğme ile ilgili action'lar
+        var actionDugmeDeger = function(deger) {
+            return {
+                type: "DUGME.DEGER",
+                deger: deger
+            }
+        }
+        var actionDugmeAktiflik = function(aktiflik) {
+            return {
+                type: "DUGME.AKTIFLIK",
+                aktiflik: aktiflik
+            }
+        }
+
+        // Metin ile ilgili reducer (yalnızca metinle ilgili action'larla ilgilenir)
+        var reducerMetin = function (state, action){
+            if (typeof state === 'undefined') {
+                return null;
+            }
+            switch(action.type) {
+                case "METIN.ICERIK":
+                    return Object.assign({}, state, { icerik : action.icerik });
+                case "METIN.RENK":
+                    return Object.assign({}, state, { renk : action.renk });
+                default:
+                    return state;
+            }
+        }
+
+        // Düğme ile ilgili reducer (yalnızca düğme ile ilgili action'larla ilgilenir)
+        var reducerDugme = function (state, action){
+            if (typeof state === 'undefined') {
+                return null;
+            }
+            switch(action.type) {
+                case "DUGME.DEGER":
+                    return Object.assign({}, state, { deger : action.deger });
+                case "DUGME.AKTIFLIK":
+                    return Object.assign({}, state, { aktiflik : action.aktiflik });
+                default:
+                    return state;
+            }
+        }
+
+        // 
+        var initialState = {
+            reducerMetin: {
+                icerik: "Metin",
+                renk: "White"
+            },
+            reducerDugme: {
+                deger: "Dugme",
+                aktiflik: true
+            }
+        }
+
+        // Bütün reducerları birleştir (her yeni yapı için yeni reduclerlar oluşturun)
+        var rootReducer = Redux.combineReducers({
+            reducerMetin: reducerMetin,
+            reducerDugme: reducerDugme
+        });
+
+        // rootReducer'ın olduğu store'umuzu oluşturalım
+        var store = Redux.createStore(rootReducer, initialState);
+
+
+        // Listeners
+        var renderMetin = function(){
+            $('#txtMetin').val(store.getState().reducerMetin.icerik);
+            $("#txtMetin").css('background-color', store.getState().reducerMetin.renk);
+        }
+
+        var renderDugme = function(){
+            $('#btnDugme').val(store.getState().reducerDugme.deger);
+            $('#btnDugme').prop('disabled', !store.getState().reducerDugme.aktiflik);
+        }
+
+        // Listeners için Subscribers
+        store.subscribe(renderMetin);
+        store.subscribe(renderDugme);
+
+
+
+        // Klasik HTML/JS fonksiyonlarımız
+        var btnMetinIcerikOnClick = function(){
+            var act = actionMetinIcerik($("#txtMetinIcerik").val());
+            store.dispatch(act);
+        }
+
+        var btnMetinRenkOnClick = function(){
+            var act = actionMetinRenk($("#txtMetinRenk").val());
+            store.dispatch(act);
+        }
+
+        var btnDugmeDegerOnClick = function(){
+            var act = actionDugmeDeger($("#txtDugmeDeger").val());
+            store.dispatch(act);
+        }
+
+        var btnDugmeAktiflikOnClick = function(){
+            var act = actionDugmeAktiflik($("#chkDugmeAktiflik").prop('checked'));
+            store.dispatch(act);
+        }
+
+    </script>
+  </body>
+</html>
